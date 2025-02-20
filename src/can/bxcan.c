@@ -136,7 +136,7 @@ void can_enable(can_data_t *channel, uint32_t mode)
 	can->BTR = btr;
 
 	can->MCR &= ~CAN_MCR_INRQ;
-	while ((can->MSR & CAN_MSR_INAK) != 0);
+	while ((can->MSR & CAN_MSR_INAK) != 0);//
 
 	uint32_t filter_bit = 0x00000001;
 	can->FMR |= CAN_FMR_FINIT;

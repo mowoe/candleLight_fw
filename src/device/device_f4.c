@@ -31,10 +31,11 @@ THE SOFTWARE.
 
 void device_can_init(can_data_t *channel, CAN_TypeDef *instance) {
 	__HAL_RCC_CAN1_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
 
 	GPIO_InitTypeDef itd;
 
-	itd.Pin = GPIO_PIN_0|GPIO_PIN_1;
+	itd.Pin = GPIO_PIN_8|GPIO_PIN_9;
 	itd.Mode = GPIO_MODE_AF_PP;
 	itd.Pull = GPIO_NOPULL;
 	itd.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -49,21 +50,76 @@ void device_can_init(can_data_t *channel, CAN_TypeDef *instance) {
 	return;
 }
 
+void Error_Handler(void)
+{
+    while (1) {
+        for (uint8_t j = 0; j < 50; j++) {
+            HAL_GPIO_TogglePin(LEDRX_GPIO_Port, LEDRX_Pin);
+            HAL_Delay(50);
+            HAL_GPIO_TogglePin(LEDRX_GPIO_Port, LEDRX_Pin);
+            HAL_Delay(50);
+            HAL_GPIO_TogglePin(LEDRX_GPIO_Port, LEDRX_Pin);
+            HAL_Delay(50);
+            HAL_GPIO_TogglePin(LEDRX_GPIO_Port, LEDRX_Pin);
+            HAL_Delay(50);
+            HAL_GPIO_TogglePin(LEDTX_GPIO_Port, LEDTX_Pin);
+        }
+    }
+}
+
 void device_sysclock_config(void) {
-	RCC_OscInitTypeDef RCC_OscInitStruct;
+    RCC_OscInitTypeDef RCC_OscInitStruct;
 	RCC_ClkInitTypeDef RCC_ClkInitStruct;
+
+  /** Configure the main internal regulator output voltage
+  */
+  __HAL_RCC_PWR_CLK_ENABLE();
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = 4;
+  RCC_OscInitStruct.PLL.PLLN = 72;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 3;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/3000);
+  return;
 
 	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
 	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
 	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
 	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
 	RCC_OscInitStruct.PLL.PLLM = 4;
-	RCC_OscInitStruct.PLL.PLLN = 168;
+	RCC_OscInitStruct.PLL.PLLN = 72;
 	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-	RCC_OscInitStruct.PLL.PLLQ = 7;
-	HAL_RCC_OscConfig(&RCC_OscInitStruct);
+	RCC_OscInitStruct.PLL.PLLQ = 3;
+    HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
-	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK |
+	/*RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK |
 								  RCC_CLOCKTYPE_SYSCLK |
 								  RCC_CLOCKTYPE_PCLK1 |
 								  RCC_CLOCKTYPE_PCLK2;
@@ -71,11 +127,20 @@ void device_sysclock_config(void) {
 	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
 	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
-	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
+	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);*/
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+    HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2);
 
 	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
 
-	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+	//HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+
+
 
 	/* SysTick_IRQn interrupt configuration */
 	HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);

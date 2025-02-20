@@ -106,18 +106,18 @@ void gpio_init(void)
 #ifdef LEDRX_Pin
 	HAL_GPIO_WritePin(LEDRX_GPIO_Port, LEDRX_Pin, GPIO_INIT_STATE(LEDRX_Active_High));
 	GPIO_InitStruct.Pin = LEDRX_Pin;
-	GPIO_InitStruct.Mode = LEDRX_Mode;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_PULLUP;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 	HAL_GPIO_Init(LEDRX_GPIO_Port, &GPIO_InitStruct);
 #endif
 
 #ifdef LEDTX_Pin
 	HAL_GPIO_WritePin(LEDTX_GPIO_Port, LEDTX_Pin, GPIO_INIT_STATE(LEDTX_Active_High));
 	GPIO_InitStruct.Pin = LEDTX_Pin;
-	GPIO_InitStruct.Mode = LEDTX_Mode;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_PULLUP;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 	HAL_GPIO_Init(LEDTX_GPIO_Port, &GPIO_InitStruct);
 #endif
 
@@ -150,6 +150,16 @@ void gpio_init(void)
 
 
 #if defined(BOARD_STM32F4_DevBoard)
+	// initialize USB pins
+	GPIO_InitStruct.Pin = USB_Pin_DM | USB_Pin_DP;
+	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+	GPIO_InitStruct.Alternate = GPIO_AF10_OTG_FS;
+	HAL_GPIO_Init(USB_GPIO_Port, &GPIO_InitStruct);
+#endif
+
+#if defined(BOARD_PELICAN)
 	// initialize USB pins
 	GPIO_InitStruct.Pin = USB_Pin_DM | USB_Pin_DP;
 	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;

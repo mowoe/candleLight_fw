@@ -60,21 +60,38 @@ void __weak _read(void) {
 void __weak _write(void) {
 }
 
+void Runtime_Error_Handler(void)
+{
+    while (1) {
+        HAL_GPIO_TogglePin(LEDTX_GPIO_Port, LEDTX_Pin);
+        HAL_GPIO_TogglePin(LEDRX_GPIO_Port, LEDRX_Pin);
+        HAL_Delay(100);
+        HAL_GPIO_TogglePin(LEDRX_GPIO_Port, LEDRX_Pin);
+        HAL_Delay(100);
+        HAL_GPIO_TogglePin(LEDRX_GPIO_Port, LEDRX_Pin);
+        HAL_Delay(100);
+        HAL_GPIO_TogglePin(LEDRX_GPIO_Port, LEDRX_Pin);
+        HAL_Delay(500);
+        HAL_GPIO_TogglePin(LEDTX_GPIO_Port, LEDTX_Pin);
+        HAL_Delay(800);
+    }
+}
+
 int main(void)
 {
 	HAL_Init();
 	SystemClock_Config();
 
-	gpio_init();
+    gpio_init();
 	timer_init();
 
-	INIT_LIST_HEAD(&hGS_CAN.list_frame_pool);
+    INIT_LIST_HEAD(&hGS_CAN.list_frame_pool);
 	INIT_LIST_HEAD(&hGS_CAN.list_to_host);
 
-	for (unsigned i = 0; i < ARRAY_SIZE(hGS_CAN.msgbuf); i++) {
+    for (unsigned i = 0; i < ARRAY_SIZE(hGS_CAN.msgbuf); i++) {
 		list_add_tail(&hGS_CAN.msgbuf[i].list, &hGS_CAN.list_frame_pool);
 	}
-
+        
 	for (unsigned int i = 0; i < ARRAY_SIZE(hGS_CAN.channels); i++) {
 		can_data_t *channel = &hGS_CAN.channels[i];
 
@@ -103,13 +120,36 @@ int main(void)
 #endif
 	}
 
-	USBD_Init(&hUSB, (USBD_DescriptorsTypeDef*)&FS_Desc, DEVICE_FS);
-	USBD_RegisterClass(&hUSB, &USBD_GS_CAN);
+    //while (1) {
+    for (uint8_t j = 0; j < 10; j++) {
+        HAL_GPIO_TogglePin(LEDRX_GPIO_Port, LEDRX_Pin);
+        HAL_Delay(50);
+    }
+
+	if (USBD_Init(&hUSB, (USBD_DescriptorsTypeDef*)&FS_Desc, DEVICE_FS))
+    {
+        Runtime_Error_Handler();
+    }
+	if (USBD_RegisterClass(&hUSB, &USBD_GS_CAN))
+    {
+        Runtime_Error_Handler();
+    }
 	USBD_GS_CAN_Init(&hGS_CAN, &hUSB);
 	USBD_Start(&hUSB);
 
+    HAL_GPIO_TogglePin(LEDRX_GPIO_Port, LEDRX_Pin);
+    for (uint8_t j = 0; j < 5; j++) {
+        HAL_Delay(100);
+        HAL_GPIO_TogglePin(LEDTX_GPIO_Port, LEDTX_Pin);
+    }
+    HAL_GPIO_WritePin(LEDTX_GPIO_Port, LEDTX_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LEDRX_GPIO_Port, LEDRX_Pin, GPIO_PIN_RESET);
+    // HAL_Delay(10000);
+
 	while (1) {
-		for (unsigned int i = 0; i < ARRAY_SIZE(hGS_CAN.channels); i++) {
+        /*HAL_GPIO_WritePin(LEDTX_GPIO_Port, LEDTX_Pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(LEDRX_GPIO_Port, LEDRX_Pin, GPIO_PIN_SET);
+		*/for (unsigned int i = 0; i < ARRAY_SIZE(hGS_CAN.channels); i++) {
 			can_data_t *channel = &hGS_CAN.channels[i];
 
 			CAN_SendFrame(&hGS_CAN, channel);
@@ -117,7 +157,7 @@ int main(void)
 
 		USBD_GS_CAN_ReceiveFromHost(&hUSB);
 		USBD_GS_CAN_SendToHost(&hUSB);
-
+        
 		for (unsigned int i = 0; i < ARRAY_SIZE(hGS_CAN.channels); i++) {
 			can_data_t *channel = &hGS_CAN.channels[i];
 
@@ -126,10 +166,12 @@ int main(void)
 
 			led_update(&channel->leds);
 		}
-
+        
 		if (USBD_GS_CAN_DfuDetachRequested(&hUSB)) {
 			dfu_run_bootloader();
 		}
+        //HAL_GPIO_TogglePin(LEDRX_GPIO_Port, LEDRX_Pin);
+        //HAL_Delay(15);
 	}
 }
 

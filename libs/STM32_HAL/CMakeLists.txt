@@ -193,6 +193,11 @@ add_library(STM32_HAL_STM32F407xE STATIC ${STM32F4_SOURCES})
     target_compile_options(STM32_HAL_STM32F407xE PRIVATE ${CPUFLAGS_F4} -Wno-unused-parameter)
     target_compile_definitions(STM32_HAL_STM32F407xE PUBLIC STM32F407xx HAL_TARGET_PREFIX=stm32f4xx)
 
+add_library(STM32_HAL_STM32F405RGT STATIC ${STM32F4_SOURCES})
+    target_include_directories(STM32_HAL_STM32F405RGT PUBLIC ${INCLUDE_DIRS} include/stm32f4xx)
+    target_compile_options(STM32_HAL_STM32F405RGT PRIVATE ${CPUFLAGS_F4} -Wno-unused-parameter)
+    target_compile_definitions(STM32_HAL_STM32F405RGT PUBLIC STM32F405xx HAL_TARGET_PREFIX=stm32f4xx)
+
 add_library(STM32_HAL_STM32G0B1xx STATIC ${STM32G0_SOURCES})
     target_include_directories(STM32_HAL_STM32G0B1xx PUBLIC ${INCLUDE_DIRS} include/stm32g0xx)
     target_compile_options(STM32_HAL_STM32G0B1xx PRIVATE ${CPUFLAGS_G0} -Wno-unused-parameter)
