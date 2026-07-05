@@ -412,8 +412,8 @@ THE SOFTWARE.
 
 	#define CAN_INTERFACE			 CAN1
     #define CAN_INTERFACE2			 CAN2
-	#define CAN_CLOCK_SPEED			 16000000
-	#define NUM_CAN_CHANNEL			 1
+	#define CAN_CLOCK_SPEED			 42000000
+	#define NUM_CAN_CHANNEL			 2
 
 	#define CONFIG_PHY				 1
 	#define CONFIG_PHY_SILENT		 1

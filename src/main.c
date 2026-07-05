@@ -80,7 +80,6 @@ int main(void)
 		can_init(channel, channel_config);
 		can_disable(&hGS_CAN, channel);
 	}
-    HAL_Delay(3000);
 
 	USBD_Init(&hUSB, (USBD_DescriptorsTypeDef *)&FS_Desc, DEVICE_FS);
 	USBD_RegisterClass(&hUSB, &USBD_GS_CAN);

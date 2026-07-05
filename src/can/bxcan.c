@@ -121,30 +121,53 @@ void can_set_filter(can_data_t *channel, const struct gs_device_filter *filter)
 static bool can_apply_filter(const can_data_t *channel)
 {
 	const struct gs_device_filter_bxcan *filter = &channel->filter.bxcan;
-	CAN_TypeDef *can = channel->instance;
+#if defined(STM32F4)
+	CAN_TypeDef *can1 = CAN1;
+#else
+	CAN_TypeDef *can1 = channel->instance;
+#endif
 
-	// disable filter configuration
-	can->FMR |= CAN_FMR_FINIT;
+	// disable filter configuration on master CAN1
+	can1->FMR |= CAN_FMR_FINIT;
 
+#if defined(STM32F4) && (NUM_CAN_CHANNEL > 1)
+	// assign banks 0-13 to CAN1 and banks 14-27 to CAN2
+	can1->FMR = (can1->FMR & ~CAN_FMR_CAN2SB) | (14 << 8);
+#else
 	// use all filter banks for CAN1
-	can->FMR &= ~CAN_FMR_CAN2SB;
+	can1->FMR &= ~CAN_FMR_CAN2SB;
+#endif
 
-	// disable filters
-	can->FA1R = 0x0;
+	uint32_t start_bank = 0;
+#if defined(STM32F4) && (NUM_CAN_CHANNEL > 1)
+	uint8_t ch_nr = can_channel_get_nr(channel);
+	if (ch_nr == 1) {
+		start_bank = 14;
+	}
+#endif
 
-	can->FS1R = filter->fs1r;
-	can->FM1R = filter->fm1r;
-	can->FFA1R = filter->ffa1r;
-
-	for (uint32_t bank = 0; bank < ARRAY_SIZE(filter->fr1); bank++) {
-		can->sFilterRegister[bank].FR1 = filter->fr1[bank];
-		can->sFilterRegister[bank].FR2 = filter->fr2[bank];
+	uint32_t mask = 0x3FFF; // 14 bits
+	if (start_bank == 14) {
+		mask = 0x3FFF << 14;
 	}
 
-	can->FA1R = filter->fa1r;
+	// disable filters being updated
+	can1->FA1R &= ~mask;
+
+	can1->FS1R = (can1->FS1R & ~mask) | ((filter->fs1r & 0x3FFF) << start_bank);
+	can1->FM1R = (can1->FM1R & ~mask) | ((filter->fm1r & 0x3FFF) << start_bank);
+	can1->FFA1R = (can1->FFA1R & ~mask) | ((filter->ffa1r & 0x3FFF) << start_bank);
+
+	for (uint32_t i = 0; i < 14; i++) {
+		uint32_t bank = start_bank + i;
+		can1->sFilterRegister[bank].FR1 = filter->fr1[i];
+		can1->sFilterRegister[bank].FR2 = filter->fr2[i];
+	}
+
+	can1->FA1R = (can1->FA1R & ~mask) | ((filter->fa1r & 0x3FFF) << start_bank);
 
 	// exit filter configuration mode
-	can->FMR &= ~CAN_FMR_FINIT;
+	can1->FMR &= ~CAN_FMR_FINIT;
 
 	return true;
 }

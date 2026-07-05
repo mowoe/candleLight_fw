@@ -30,6 +30,32 @@
 
 void device_can_init(can_data_t *channel, const struct board_channel_config *channel_config)
 {
+#if defined(BOARD_PeliCAN)
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+
+	if (channel_config->interface == CAN1) {
+		__HAL_RCC_CAN1_CLK_ENABLE();
+		GPIO_InitTypeDef itd_can1 = {
+			.Pin = GPIO_PIN_8 | GPIO_PIN_9,
+			.Mode = GPIO_MODE_AF_PP,
+			.Pull = GPIO_NOPULL,
+			.Speed = GPIO_SPEED_FREQ_VERY_HIGH,
+			.Alternate = GPIO_AF9_CAN1,
+		};
+		HAL_GPIO_Init(GPIOB, &itd_can1);
+	} else if (channel_config->interface == CAN2) {
+		__HAL_RCC_CAN1_CLK_ENABLE(); // CAN1 clock must be enabled for CAN2 filters/registers
+		__HAL_RCC_CAN2_CLK_ENABLE();
+		GPIO_InitTypeDef itd_can2 = {
+			.Pin = GPIO_PIN_12 | GPIO_PIN_13,
+			.Mode = GPIO_MODE_AF_PP,
+			.Pull = GPIO_NOPULL,
+			.Speed = GPIO_SPEED_FREQ_VERY_HIGH,
+			.Alternate = GPIO_AF9_CAN2,
+		};
+		HAL_GPIO_Init(GPIOB, &itd_can2);
+	}
+#else
 	__HAL_RCC_CAN1_CLK_ENABLE();
 
 	GPIO_InitTypeDef itd_can1 = {
@@ -40,6 +66,7 @@ void device_can_init(can_data_t *channel, const struct board_channel_config *cha
 		.Alternate = GPIO_AF9_CAN1,
 	};
 	HAL_GPIO_Init(GPIOD, &itd_can1);
+#endif
 
 	channel->instance = channel_config->interface;
 }
