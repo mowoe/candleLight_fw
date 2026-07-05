@@ -48,6 +48,10 @@
 
 static volatile bool is_usb_suspend_cb;
 
+#ifndef USBD_MAX_POWER
+#define USBD_MAX_POWER 150
+#endif
+
 /* Configuration Descriptor */
 static const uint8_t USBD_GS_CAN_CfgDesc[USB_CAN_CONFIG_DESC_SIZ] =
 {
@@ -61,7 +65,7 @@ static const uint8_t USBD_GS_CAN_CfgDesc[USB_CAN_CONFIG_DESC_SIZ] =
 	0x01,                             /* bConfigurationValue */
 	USBD_IDX_CONFIG_STR,              /* iConfiguration */
 	0x80,                             /* bmAttributes */
-	0x4B,                             /* MaxPower 150 mA */
+	USBD_MAX_POWER / 2,               /* MaxPower */
 	/*---------------------------------------------------------------------------*/
 
 	/*---------------------------------------------------------------------------*/
