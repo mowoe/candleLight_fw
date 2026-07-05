@@ -399,6 +399,45 @@ THE SOFTWARE.
 	#define TERM_Mode				 GPIO_MODE_OUTPUT_PP
 	#define TERM_Active_High		 1
 
+/*************** SPeliCAN ***************/
+
+#elif defined(BOARD_PeliCAN)
+	#define USBD_PRODUCT_STRING_FS	 "PeliCAN"
+	#define USBD_MANUFACTURER_STRING "KA-RaceIng"
+	#define DFU_INTERFACE_STRING_FS	 "STM32F4VE firmware upgrade interface"
+
+  #define CONFIG_HSE_OSC_SPEED	 8000000
+	#define TIM2_CLOCK_SPEED		 96000000 /10
+
+	#define CAN_INTERFACE			 CAN1
+	#define CAN_CLOCK_SPEED			 42000000
+	#define NUM_CAN_CHANNEL			 1
+
+	#define CONFIG_PHY				 1
+	#define CONFIG_PHY_SILENT		 1
+	#define CAN_S_GPIO_Port			 GPIOA
+	#define CAN_S_Pin				 GPIO_PIN_10
+
+	#define LEDRX_GPIO_Port			 GPIOB
+	#define LEDRX_Pin				 GPIO_PIN_0
+	#define LEDRX_Mode				 GPIO_MODE_OUTPUT_PP
+	#define LEDRX_Active_High		 0
+
+	#define LEDTX_GPIO_Port			 GPIOB
+	#define LEDTX_Pin				 GPIO_PIN_1
+	#define LEDTX_Mode				 GPIO_MODE_OUTPUT_PP
+	#define LEDTX_Active_High		 0
+
+	#define USB_GPIO_Port			 GPIOA
+	#define USB_Pin_DM				 GPIO_PIN_11
+	#define USB_Pin_DP				 GPIO_PIN_12
+
+	#define CONFIG_TERMINATION		 1
+	#define TERM_GPIO_Port			 GPIOB
+	#define TERM_Pin				 GPIO_PIN_3
+	#define TERM_Mode				 GPIO_MODE_OUTPUT_PP
+	#define TERM_Active_High		 1
+
 /*************** STM32G0B1 ***************/
 
 #elif defined(BOARD_CONVERTDEVICE_xCANFD)

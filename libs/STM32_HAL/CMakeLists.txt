@@ -201,3 +201,8 @@ add_library(STM32_HAL_STM32G0B1xx STATIC ${STM32G0_SOURCES})
 target_include_directories(STM32_HAL_STM32G0B1xx PUBLIC ${INCLUDE_DIRS} ${STM32G0_HALDIR}/Inc)
 target_compile_options(STM32_HAL_STM32G0B1xx PRIVATE ${CPUFLAGS_G0} -Wno-unused-parameter)
 target_compile_definitions(STM32_HAL_STM32G0B1xx PUBLIC STM32G0B1xx)
+
+add_library(STM32_HAL_STM32F405RGT STATIC ${STM32F4_SOURCES})
+    target_include_directories(STM32_HAL_STM32F405RGT PUBLIC ${INCLUDE_DIRS} ${STM32F4_HALDIR}/Inc include/stm32f4xx)
+    target_compile_options(STM32_HAL_STM32F405RGT PRIVATE ${CPUFLAGS_F4} -Wno-unused-parameter)
+    target_compile_definitions(STM32_HAL_STM32F405RGT PUBLIC STM32F405xx HAL_TARGET_PREFIX=stm32f4xx)

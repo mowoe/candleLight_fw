@@ -327,6 +327,15 @@ populate_ldscript(CPU_FAMILY STM32F042X6
 	HEAP_SIZE 0k
 )
 
+populate_ldscript(CPU_FAMILY STM32F405XX
+    FLASH_START 0x08000000
+    FLASH_SIZE 1024k
+    RAM_START 0x20000000
+    RAM_SIZE 128K
+    STACK_SIZE 2k
+    HEAP_SIZE 1k
+)
+
 populate_ldscript(CPU_FAMILY STM32F072XB
 	FLASH_START 0x08000000
 	FLASH_SIZE 128k
@@ -407,6 +416,17 @@ function(add_f407_target TGTNAME)
 	target_link_libraries(${TGTNAME}_fw PRIVATE STM32_HAL_STM32F407xE STM32_USB_Device_Library_STM32F407xE)
 endfunction()
 
+function(add_f405_target TGTNAME)
+	add_target_common(${TGTNAME} STM32F405XX)
+	target_compile_definitions(${TGTNAME}_fw PRIVATE BOARD_${TGTNAME} STM32F4 CONFIG_BXCAN)
+	target_compile_options(${TGTNAME}_fw BEFORE PRIVATE ${CPUFLAGS_F4})
+	target_sources(${TGTNAME}_fw PRIVATE "src/boards/legacy.c")
+	target_sources(${TGTNAME}_fw PRIVATE "src/can/bxcan.c")
+	target_sources(${TGTNAME}_fw PRIVATE "src/device/device_f4.c")
+	target_link_options(${TGTNAME}_fw BEFORE PRIVATE ${CPUFLAGS_F4})
+	target_link_libraries(${TGTNAME}_fw PRIVATE STM32_HAL_STM32F405RGT STM32_USB_Device_Library_STM32F405RGT)
+endfunction()
+
 function(add_g0b1_target TGTNAME)
 	add_target_common(${TGTNAME} STM32G0B1xx)
 	target_compile_definitions(${TGTNAME}_fw PRIVATE BOARD_${TGTNAME} STM32G0 CONFIG_M_CAN)
@@ -439,6 +459,10 @@ set(TGTF072_LIST
 set(TGTF407_LIST
 	"STM32F4_DevBoard"
 )
+
+set(TGTF405_LIST
+	"PeliCAN"
+)
 set(TGTG0B1_LIST
 	"CONVERTDEVICE_xCANFD"
 	"budgetcan"
@@ -462,6 +486,13 @@ foreach (TGTNAME IN LISTS TGTF407_LIST)
 	option(BUILD_${TGTNAME} "Build firmware for \"${TGTNAME}\" (default=yes)" ON)
 	if (BUILD_${TGTNAME})
 		add_f407_target(${TGTNAME})
+	endif()
+endforeach()
+
+foreach (TGTNAME IN LISTS TGTF405_LIST)
+	option(BUILD_${TGTNAME} "Build firmware for \"${TGTNAME}\" (default=yes)" ON)
+	if (BUILD_${TGTNAME})
+		add_f405_target(${TGTNAME})
 	endif()
 endforeach()
 

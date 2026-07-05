@@ -34,3 +34,10 @@ add_library(STM32_USB_Device_Library_STM32G0B1xx STATIC ${SOURCES})
     target_include_directories(STM32_USB_Device_Library_STM32G0B1xx PUBLIC ${INCLUDE_DIRS})
     target_compile_options(STM32_USB_Device_Library_STM32G0B1xx PRIVATE ${CPUFLAGS_G0} -Wno-unused-parameter -DSTM32G0)
     target_link_libraries(STM32_USB_Device_Library_STM32G0B1xx PRIVATE STM32_HAL_STM32G0B1xx)
+
+add_library(STM32_USB_Device_Library_STM32F405RGT STATIC ${SOURCES})
+    target_include_directories(STM32_USB_Device_Library_STM32F405RGT PUBLIC ${INCLUDE_DIRS})
+    target_compile_options(STM32_USB_Device_Library_STM32F405RGT PRIVATE ${CPUFLAGS_F4} -Wno-unused-parameter -DSTM32F4)
+    target_link_libraries(STM32_USB_Device_Library_STM32F405RGT PRIVATE STM32_HAL_STM32F405RGT)
+
+
