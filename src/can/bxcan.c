@@ -91,6 +91,15 @@ static void rcc_reset(CAN_TypeDef *instance)
 #endif
 }
 
+static bool can1_shared_state_is_in_use(void)
+{
+#if defined(CAN2)
+	return (CAN2->MCR & CAN_MCR_INRQ) == 0;
+#else
+	return false;
+#endif
+}
+
 void can_init(can_data_t *channel, const struct board_channel_config *channel_config)
 {
 	struct gs_device_filter_bxcan *filter = &channel->filter.bxcan;
@@ -193,13 +202,16 @@ void can_drv_enable(struct can_channel *channel)
 		btr |= CAN_MODE_LOOPBACK;
 	}
 
-	// Reset CAN peripheral
-	can->MCR |= CAN_MCR_RESET;
-	while ((can->MCR & CAN_MCR_RESET) != 0);        // reset bit is set to zero after reset
-	while ((can->MSR & CAN_MSR_SLAK) == 0);         // should be in sleep mode after reset
+	// Reset CAN peripheral unless CAN2 is already active. CAN1 reset clears the
+	// shared bxCAN filter state, so preserve it once CAN2 is running.
+	if (!(can == CAN1 && can1_shared_state_is_in_use())) {
+		can->MCR |= CAN_MCR_RESET;
+		while ((can->MCR & CAN_MCR_RESET) != 0);        // reset bit is set to zero after reset
+		while ((can->MSR & CAN_MSR_SLAK) == 0);         // should be in sleep mode after reset
 
-	// Completely reset while being of the bus
-	rcc_reset(can);
+		// Completely reset while being off the bus
+		rcc_reset(can);
+	}
 
 	can->MCR |= CAN_MCR_INRQ;
 	while ((can->MSR & CAN_MSR_INAK) == 0);
