@@ -1,3 +1,55 @@
+# PeliCAN_fw
+
+This is a fork of the [https://github.com/candle-usb/candleLight_fw](candleLight_fw) modified for the STM32F405 used in the PeliCAN board. 
+
+## Building
+
+Install gcc-arm-none-eabi, e.g. on Debian/Ubuntu:
+
+```shell
+sudo apt-get install gcc-arm-none-eabi
+```
+Now you're ready to build the firmware: 
+
+```shell
+mkdir build
+cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake/arm-none-eabi-gcc.cmake
+
+# or,
+# cmake-gui ..
+# don't forget to specify the cmake toolchain file before configuring.
+#
+# compile all targets :
+
+make
+
+# OR, each board target is a cmake option and can be disabled before running 'make';
+# OR, compile a single target , e.g.
+make PeliCAN_fw
+
+#
+# to list possible targets :
+make help
+```
+
+## Flashing
+
+Flashing can be done with openocd and the STLink with the following command:
+
+```shell
+openocd -s /usr/share/openocd/scripts \
+-f board/stm32f4discovery.cfg \
+-c "tcl_port disabled" \
+-c "gdb_port enabled" \
+-c "program \"PeliCAN_fw\"" \
+-c "reset" \
+-c "shutdown" \
+```
+
+> [!IMPORTANT]  
+> Below is the original README.md description of the candleLight_fw, for reference.
+
 # candleLight_gsusb
 [![Build](https://github.com/candle-usb/candleLight_fw/actions/workflows/ci.yml/badge.svg)](https://github.com/candle-usb/candleLight_fw/actions)
 
